@@ -1,0 +1,10 @@
+server:
+  port: 3000
+
+database:
+  name: customer-communication-service
+  mongoUri: mongodb://root:example@localhost:27017/admin
+  
+emailAuth:
+  user: no-reply@example.com
+  pass: 12345678
