@@ -1,4 +1,8 @@
 {
+  "name": "customer-communication-service",
+  "version": "1.0.0",
+  "description": "The customer communication service notify user with multiple different ways",
+  "author": "Rick Ryan <rick.ryan2@outlook.com>",
   "main": "src/app.js",
   "scripts": {
     "start": "node .",
@@ -6,10 +10,12 @@
   },
   "dependencies": {
     "body-parser": "^1.20.0",
+    "compression": "^1.7.4",
     "deasync": "^0.1.28",
     "express": "^4.18.1",
     "js-yaml": "^4.1.0",
     "mongodb": "^4.10.0",
+    "node-telegram-bot-api": "^0.59.0",
     "nodemailer": "^6.7.8"
   }
 }
