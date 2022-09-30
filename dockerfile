@@ -1,6 +1,6 @@
 FROM node:16-alpine
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN mkdir -p /usr/src/app
 
