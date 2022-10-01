@@ -1,6 +1,5 @@
 name: Docker Image CI
-env:
-  app_env: production
+  
 on:
   push:
     branches: [ "main" ]
@@ -9,6 +8,7 @@ on:
   
 
 env:
+  APP_ENV: production
   AWS_REGION: us-west-2
   ECR_REPOSITORY: customer-communication-service
 
@@ -17,14 +17,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    environment: ${{env.app_env}}
+    environment: ${{env.APP_ENV}}
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Test env
         env: 
-          TEST_ENV: ${{env.app_env}}
+          TEST_ENV: ${{env.APP_ENV}}
         run: |
           echo "::set-output name=image::$TEST_ENV"
 
@@ -32,7 +32,7 @@ jobs:
         uses: cuchi/jinja2-action@v1.2.0
         with:
           template: configuration/config_template.yaml
-          output_file: configuration/${{env.app_env}}.yaml
+          output_file: configuration/${{env.APP_ENV}}.yaml
           strict: true
           variables: |
             database_mongo_name=${{secrets.MONGO_DB_NAME}}
