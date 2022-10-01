@@ -3,14 +3,14 @@ server:
 
 database:
   mongo:
-    name: {{database.mongo.name}}
-    uri: {{database.mongo.uri}}
+    name: {{database_mongo_name}}
+    uri: {{database_mongo_uri}}
   
 emailServer:
-  user: {{emailServer.user}}
-  pass: {{emailServer.pass}}
+  user: {{emailServer_user}}
+  pass: {{emailServer_pass}}
 
 telegramServer:
   bot:
-    username: {{telegramServer.bot.username}}
-    token: {{telegramServer.bot.token}}
+    username: {{telegramServer_bot_username}}
+    token: {{telegramServer_bot_token}}
