@@ -1,0 +1,16 @@
+server:
+  port: 3000
+
+database:
+  mongo:
+    name: {{database_mongo_name}}
+    uri: {{database_mongo_uri}}
+  
+emailServer:
+  user: {{emailServer_user}}
+  pass: {{emailServer_pass}}
+
+telegramServer:
+  bot:
+    username: {{telegramServer_bot_username}}
+    token: {{telegramServer_bot_token}}
