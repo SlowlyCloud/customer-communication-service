@@ -17,14 +17,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    environment: ${{github.env.APP_ENV}}
+    environment: production
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Test env
         env: 
-          TEST_ENV: ${{env.APP_ENV}}
+          TEST_ENV: ${{github.job.environment}}
         run: |
           echo "::set-output name=image::$TEST_ENV"
 
