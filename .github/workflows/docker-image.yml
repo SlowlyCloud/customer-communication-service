@@ -22,12 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Test env
-        env: 
-          TEST_ENV: ${{github.job.environment}}
-        run: |
-          echo "::set-output name=image::$TEST_ENV"
-
       - name: Render config template
         uses: cuchi/jinja2-action@v1.2.0
         with:
