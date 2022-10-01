@@ -19,6 +19,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Render config template
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: configuration/config_template.yaml
+          output_file: configuration/${{jobs.build.environment}}.yaml
+          strict: true
+          variables: |
+            database.mongo.name=${{MONGO_DB_NAME}}
+            database.mongo.uri=${{MONGO_URI}}
+            emailServer.user=${{EMAIL_SERVER_USER}}
+            emailServer.pass=${{EMAIL_SERVER_PASS}}
+            telegramServer.bot.username= 
+            telegramServer.bot.token= 
     
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
