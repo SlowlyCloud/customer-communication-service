@@ -17,7 +17,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    environment: ${{env.APP_ENV}}
+    environment: ${{github.env.APP_ENV}}
 
     steps:
       - uses: actions/checkout@v3
