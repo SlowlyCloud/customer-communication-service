@@ -3,7 +3,7 @@ const deasync = require('deasync')
 const { Meta } = require('./common')
 const config = require('./config')
 
-const client = new MongoClient(config.database.mongoUri)
+const client = new MongoClient(config.database.mongo.uri)
 let db = null
 let loaded = false
 
@@ -13,7 +13,7 @@ const init = async () => {
         await client.connect();
         // Establish and verify connection
         await client.db("admin").command({ ping: 1 });
-        db = await client.db(config.database.name)
+        db = await client.db(config.database.mongo.name)
         console.log("Connected successfully to server");
     } catch (e) {
         await mongodbClose()
