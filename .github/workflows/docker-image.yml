@@ -1,12 +1,14 @@
 name: Docker Image CI
-
+  
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  
 
 env:
+  APP_ENV: production
   AWS_REGION: us-west-2
   ECR_REPOSITORY: customer-communication-service
 
@@ -19,6 +21,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Render config template
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: configuration/config_template.yaml
+          output_file: configuration/${{env.APP_ENV}}.yaml
+          strict: true
+          variables: |
+            database_mongo_name=${{secrets.MONGO_DB_NAME}}
+            database_mongo_uri=${{secrets.MONGO_URI}}
+            emailServer_user=${{secrets.EMAIL_SERVER_USER}}
+            emailServer_pass=${{secrets.EMAIL_SERVER_PASS}}
+            telegramServer_bot_username= 
+            telegramServer_bot_token= 
     
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
@@ -40,6 +56,6 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"

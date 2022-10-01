@@ -9,8 +9,8 @@ const app = express()
 // config
 const port = config.server.port
 const emailAuth = {
-  user: config.emailAuth.user,
-  pass: config.emailAuth.pass
+  user: config.emailServer.user,
+  pass: config.emailServer.pass
 }
 
 app.get('/ping', (req, res) => {

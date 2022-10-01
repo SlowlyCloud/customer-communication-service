@@ -2,9 +2,10 @@ server:
   port: 3000
 
 database:
-  name: customer-communication-service
-  mongoUri: mongodb://root:example@localhost:27017/admin
+  mongo:
+    name: customer-communication-service
+    uri: mongodb://root:example@localhost:27017/admin
   
-emailAuth:
+emailServer:
   user: no-reply@example.com
   pass: 12345678

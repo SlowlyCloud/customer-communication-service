@@ -1,8 +1,8 @@
 const yaml = require('js-yaml')
 const fs = require('fs')
 
-const defaultEnv = 'dev'
-const env = process.env.Environment || defaultEnv
+const defaultEnv = 'development'
+const env = process.env.NODE_ENV || defaultEnv
 const conf = yaml.load(fs.readFileSync(`configuration/${env}.yaml`))
 
 module.exports= {...conf}
