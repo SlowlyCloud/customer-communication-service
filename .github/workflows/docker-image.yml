@@ -23,7 +23,7 @@ jobs:
 
       - name: Test env
         env: 
-          TEST_ENV: ${{ob.environment}}
+          TEST_ENV: ${{job.environment}}
         run: |
           echo "::set-output name=image::$TEST_ENV"
 
