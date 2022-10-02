@@ -5,25 +5,25 @@ const config = require('./config')
 
 const client = new MongoClient(config.database.mongo.uri)
 let db = null
-let loaded = false
+let locked = true
 
-const init = async () => {
-    try {
+try {
+    async function init() {
         // Connect the client to the server (optional starting in v4.7)
-        await client.connect();
+        await client.connect()
         // Establish and verify connection
-        await client.db("admin").command({ ping: 1 });
+        await client.db("admin").command({ ping: 1 })
         db = await client.db(config.database.mongo.name)
-        console.log("Connected successfully to server");
-    } catch (e) {
-        await mongodbClose()
-        throw new Error('mongo starting failed: %s', e)
-    } finally {
-        loaded = true
+        console.log("Connected successfully to server")
+        locked = false
     }
+    init()
+} catch (e) {
+    mongodbClose().finally(locked = false)
+    throw new Error('mongo starting failed: %s', e)
+} finally {
+    while (locked) { deasync.sleep(50) }
 }
-init()
-while (!loaded) { deasync.sleep(50) }
 
 module.exports.recordEmailSent = async (userId, from, to, subject, content) => {
     await db.collection('email_sent_audit_log').insertOne({
