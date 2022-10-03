@@ -71,11 +71,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Generate token for checkout
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+
       - name: Fetch task definition 
         uses: actions/checkout@v3
         with:
           repository: 'SlowlyCloud/aws-deployment'
           ref: 'master'
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
