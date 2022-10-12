@@ -1,29 +1,5 @@
-const { MongoClient } = require('mongodb')
-const deasync = require('deasync')
-const { Meta } = require('./common')
-const config = require('./config')
-
-const client = new MongoClient(config.database.mongo.uri)
-let db = null
-let locked = true
-
-try {
-    async function init() {
-        // Connect the client to the server (optional starting in v4.7)
-        await client.connect()
-        // Establish and verify connection
-        await client.db("admin").command({ ping: 1 })
-        db = await client.db(config.database.mongo.name)
-        console.log("Connected successfully to server")
-        locked = false
-    }
-    init()
-} catch (e) {
-    mongodbClose().finally(locked = false)
-    throw new Error('mongo starting failed: %s', e)
-} finally {
-    while (locked) { deasync.sleep(50) }
-}
+const { db } = require('./mongo')
+const { Meta } = require('../common')
 
 module.exports.recordEmailSent = async (userId, from, to, subject, content) => {
     await db.collection('email_sent_audit_log').insertOne({
@@ -62,9 +38,3 @@ module.exports.countEmailSentByEmail = async (email, timePeriod) => {
 
     return await db.collection('email_sent_audit_log').countDocuments(filter)
 }
-
-const mongodbClose = async () => {
-    await client.close();
-}
-
-module.exports.close = mongodbClose

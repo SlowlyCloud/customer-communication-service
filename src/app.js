@@ -1,74 +1,24 @@
 const express = require('express')
-const emailer = require('nodemailer')
-const bodyParser = require('body-parser')
-const url = require('url')
 const config = require('./config')
-const db = require('./db')
+const { getFiles } = require('./common')
 const app = express()
 
 // config
+const apisFolderName = 'apis'
 const port = config.server.port
-const emailAuth = {
-  user: config.emailServer.user,
-  pass: config.emailServer.pass
-}
 
 app.get('/ping', (req, res) => {
   res.send('pong!')
 })
 
-app.post("/notification/email", bodyParser.raw({ type: 'html' }), async (req, res) => {
-  let to = req.query.to
-  let subject = req.query.subject
-  let content = req.body
-
-  let transporter = emailer.createTransport({
-    host: 'smtpout.secureserver.net',
-    secure: true,
-    auth: {
-      user: emailAuth.user,
-      pass: emailAuth.pass
-    }
-  })
-
-  let info = transporter.sendMail({
-    from: emailAuth.user,
-    to: to,
-    subject: subject,
-    html: content
-  })
-  await db.recordEmailSent(null, emailAuth.user, to, subject, content)
-
-  console.log('Email message sent: %s', info.messageId)
-
-  res.send(info)
+// load & register all routers by their relative path
+var path = require('path').join(__dirname, apisFolderName)
+getFiles(path).forEach(file => {
+  let apiPath = file.replace(path, '').replace('.js', '')
+  console.log(`loading file:${file} & registering path of route ${apiPath}`);
+  app.use(apiPath, require(file))
 })
 
-app.get('/statistic/user/:email/count', async (req, res) => {
-  let userEmailAddress = req.params.email
-  let timePeriod = req.query.start && req.query.end ?
-    { start: new Date(req.query.start), end: new Date(req.query.end) } : null
-
-  let count = await db.countEmailSentByEmail(userEmailAddress, timePeriod)
-
-  res.send({
-    count: count,
-    timePeriod: timePeriod
-  })
-})
-
-app.get('/notification/email', async (req, res) => {
-  let userEmailAddress = req.query.email
-  let timePeriod = req.query.start && req.query.end ?
-    { start: new Date(req.query.start), end: new Date(req.query.end) } : null
-
-  let records = await db.listEmailSentByEmail(userEmailAddress, timePeriod)
-
-  res.send({
-    records: records,
-    timePeriod: timePeriod
-  })
-})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
