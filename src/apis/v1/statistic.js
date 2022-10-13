@@ -14,7 +14,7 @@ router.get('/email/:email/count', async (req, res) => {
   })
 })
 
-router.get('tg/:chatId/count', async (req, res) => {
+router.get('/tg/:chatId/count', async (req, res) => {
   let chatId = req.params.chatId
   let timePeriod = req.query.start && req.query.end ?
     { start: new Date(req.query.start), end: new Date(req.query.end) } : null
