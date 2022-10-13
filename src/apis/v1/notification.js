@@ -31,4 +31,17 @@ router.get('/email', async (req, res) => {
     })
 })
 
+router.get('/tg', async (req, res) => {
+    let chatId = req.query.chatId
+    let timePeriod = req.query.start && req.query.end ?
+        { start: new Date(req.query.start), end: new Date(req.query.end) } : null
+
+    let records = await db.notifyingLog.listNotifyingByTgChatId(chatId, timePeriod)
+
+    res.send({
+        records: records,
+        timePeriod: timePeriod
+    })
+})
+
 module.exports = router
