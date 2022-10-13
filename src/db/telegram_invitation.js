@@ -4,31 +4,12 @@ const { Meta } = require('../common')
 
 const table = 'telegram_invitaiton'
 
-const findByCode = async (code) => {
-  return await db.collection(table).find({ 'invitationCode': code }).toArray()
-}
-
-const deleteManyByIds = async (ids) => {
-  let oids = ids.map(v => ObjectId(v))
-  return await db
-    .collection(table)
-    .deleteMany({
-      _id: {
-        $in: oids
-      }
-    })
-}
-
 const isExpired = date => new Date().getTime() > new Date(date).getTime()
 
 const cleanExpiredCode = async (code) => {
-  let res = await findByCode(code)
-  let info = await deleteManyByIds(
-    res
-      .filter(v => isExpired(v.expiredAt))
-      .map(v => v._id)
-  )
-  return info.deletedCount > 0
+  let old = await db.collection(table).findOne({ '_id': code })
+  return old && isExpired(old.expiredAt) ?
+    db.collection(table).deleteOne(old) : false
 }
 
 
@@ -36,7 +17,7 @@ const cleanExpiredCode = async (code) => {
 module.exports.save = async (code, link, lifeDuration) => {
   await cleanExpiredCode(code)
   return await db.collection(table).insertOne({
-    invitationCode: code,
+    _id: code,
     invitaitonLink: link,
     state: 'unconfirmed',
     chatId: '',
@@ -52,14 +33,14 @@ module.exports.confirm = async (code, chatId) => {
   return await db
     .collection(table)
     .updateOne({
-      'invitationCode': code
+      '_id': code
     }, {
       $set: {
         'state': 'confirmed',
         'chatId': chatId,
         'meta.updatedAt': new Date()
       },
-      $inc: { 'meta.version': 1}
+      $inc: { 'meta.version': 1 }
     })
 }
 
@@ -69,5 +50,5 @@ module.exports.findOneByCode = async (code) => {
 
   return await db
     .collection(table)
-    .findOne({ 'invitationCode': code })
+    .findOne({ '_id': code })
 }
