@@ -11,7 +11,7 @@ router.post("/email", bodyParser.raw({ type: 'html' }), async (req, res) => {
     let content = req.body
 
     let info = await emailSender.send(from, to, subject, content)
-    await db.email.recordEmailSent(null, from, to, subject, content)
+    await db.notifyingLog.logEmailNotifying(null, from, to, subject, content)
 
     console.log('Email message sent: %s', info.messageId)
 
@@ -23,7 +23,7 @@ router.get('/email', async (req, res) => {
     let timePeriod = req.query.start && req.query.end ?
         { start: new Date(req.query.start), end: new Date(req.query.end) } : null
 
-    let records = await db.email.listEmailSentByEmail(userEmailAddress, timePeriod)
+    let records = await db.notifyingLog.listNotifyingByEmail(userEmailAddress, timePeriod)
 
     res.send({
         records: records,
