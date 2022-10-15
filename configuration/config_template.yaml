@@ -1,4 +1,5 @@
 server:
+  basePath: {{server_basePath}}
   port: 3000
 
 database:
