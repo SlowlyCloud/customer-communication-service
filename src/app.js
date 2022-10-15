@@ -22,5 +22,5 @@ getFiles(path).forEach(file => {
 
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Customer Communication Service Started on port ${port}`)
 })

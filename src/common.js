@@ -20,3 +20,7 @@ const getFiles = (dir) => {
 }
 module.exports.getFiles = getFiles
 
+module.exports.authCode = (length = 8) => {
+    return Math.random().toString(36).substring(2, length + 2);
+}
+
