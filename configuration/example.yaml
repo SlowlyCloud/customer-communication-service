@@ -1,4 +1,5 @@
 server:
+  basePath: /ccs
   port: 3000
 
 database:
