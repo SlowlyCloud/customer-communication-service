@@ -15,3 +15,4 @@ telegramServer:
   bot:
     username: {{telegramServer_bot_username}}
     token: {{telegramServer_bot_token}}
+    webhook: {{telegramServer_bot_webhook}}

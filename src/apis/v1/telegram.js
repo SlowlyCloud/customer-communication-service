@@ -23,6 +23,11 @@ router.get('/invitation/:code', async (req, res) => {
   res.send(await db.tgInvitation.findOneByCode(code))
 })
 
+router.post(`/webhook/${tgBot.getBotUserName()}`, (req, res) => {
+  tgBot.handleReqFromWebhook(req.body)
+  res.sendStatus(200)
+})
+
 tgBot.onChatStart((msg) => {
   console.log(msg)
   let regex = /^\/start ([0-9a-zA-Z]{6}$)/
@@ -30,5 +35,6 @@ tgBot.onChatStart((msg) => {
   console.log('code: ' + code)
   db.tgInvitation.confirm(code, msg.chat.id)
 })
+
 
 module.exports = router
