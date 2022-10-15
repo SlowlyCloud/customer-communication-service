@@ -1,14 +1,22 @@
+/**
+ * * * * * * * * * NOTICE! * * * * * * * * * *
+ * THE TG BOT SHOULD NOLY BE SINGLE INTANCE 
+ * TO POLLING DATA, TO AVOID THIS 
+ * RESTRICTION, SET A WEBHOOK IN CONFIG INSTEAD 
+ * * * * * * * * * * * * * * * * * * * * * * *
+ */
+
 const TelegramBot = require('node-telegram-bot-api')
 const config = require('../config')
-const { tg } = require('../db')
 
 // Config
 const tgAuth = {
   name: config.telegramServer.bot.username,
-  token: config.telegramServer.bot.token
+  token: config.telegramServer.bot.token,
+  webhook: config.telegramServer.bot.webhook
 }
 
-const bot = new TelegramBot(tgAuth.token, { polling: true })
+const bot = new TelegramBot(tgAuth.token, { polling: tgAuth.webhook ? false : true })
 
 module.exports.getBotUserName = () => tgAuth.name
 
@@ -26,3 +34,5 @@ module.exports.generateInvitingLink = (bindingId) => {
 module.exports.onChatStart = (cb) => {
   bot.onText(/\/start/, (msg) => cb(msg))
 }
+
+module.exports.handleReqFromWebhook = body => bot.processUpdate(body)
