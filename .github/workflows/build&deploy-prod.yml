@@ -35,12 +35,13 @@ jobs:
           output_file: configuration/${{env.APP_ENV}}.yaml
           strict: true
           variables: |
+            server_basePath=${{secrets.SERVER_BASEPATH}}
             database_mongo_name=${{secrets.MONGO_DB_NAME}}
             database_mongo_uri=${{secrets.MONGO_URI}}
             emailServer_user=${{secrets.EMAIL_SERVER_USER}}
             emailServer_pass=${{secrets.EMAIL_SERVER_PASS}}
-            telegramServer_bot_username= 
-            telegramServer_bot_token= 
+            telegramServer_bot_username=${{secrets.TG_BOT_USERNAME}}
+            telegramServer_bot_token=${{secrets.TG_BOT_TOKEN}}
     
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
