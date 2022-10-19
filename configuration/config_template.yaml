@@ -9,6 +9,7 @@ database:
     uri: {{database_mongo_uri}}
   
 emailServer:
+  host: {{emailServer_host}}
   user: {{emailServer_user}}
   pass: {{emailServer_pass}}
 
