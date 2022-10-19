@@ -1,6 +1,7 @@
 server:
   basePath: /ccs
   port: 3000
+  loggingLevel: info
 
 database:
   mongo:

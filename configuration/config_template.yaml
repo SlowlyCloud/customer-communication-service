@@ -1,6 +1,7 @@
 server:
   basePath: {{server_basePath}}
   port: 3000
+  loggingLevel: {{server_loggingLevel}}
 
 database:
   mongo:
