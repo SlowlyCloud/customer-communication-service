@@ -19,8 +19,9 @@ const tgAuth = {
 
 const options = { polling: tgAuth.webhook ? false : true }
 const bot = new TelegramBot(tgAuth.token, options)
-
 log.trace('telegram bot created', { tgAuth, options })
+bot.setWebHook(tgAuth.webhook)
+log.trace('tg bot webhook set, webhook: %s', tgAuth.webhook)
 
 module.exports.getBotUserName = () => tgAuth.name
 
@@ -28,7 +29,7 @@ module.exports.getBotUserName = () => tgAuth.name
 module.exports.sentMsg = async (chatId, content, mode) => {
   mode = mode || "Markdown"
 
-  log.trace('tg sending message, chatId: %s content: %s mode: %s', chatId, content, mode)
+  log.trace('tg sending message, chatId: %s ,content: %s ,mode: %s', chatId, content, mode)
 
   let res = await bot.sendMessage(chatId, content, {
     parse_mode: mode
