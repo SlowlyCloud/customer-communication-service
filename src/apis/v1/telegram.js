@@ -29,6 +29,10 @@ router.post(`/webhook/${tgBot.getBotUserName()}`, (req, res) => {
   tgBot.handleReqFromWebhook(req.body)
   res.sendStatus(200)
   log.info(req, 'tg webhook being called')
+  log.debug({
+    req: req,
+    reqBody: req.body
+  }, 'tg webhook being called')
 })
 
 tgBot.onChatStart((msg) => {
