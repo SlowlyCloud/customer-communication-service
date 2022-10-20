@@ -1,6 +1,7 @@
 const express = require('express')
 require('express-async-errors')
 const bodyParser = require('body-parser')
+const jwt = require('jsonwebtoken')
 const log = require('./logging')
 const config = require('./config')
 const { getFiles } = require('./common')
@@ -20,6 +21,26 @@ app.use((req, res, next) => {
     direction: 'outbound',
     res: res
   }))
+  next()
+})
+
+// authorization
+app.use(async (req, res, next) => {
+  const token = req.get('Authorization')
+  if (token) return res.status(403).send("Access Denied")
+  const decoded = await new Promise((res, rej) => {
+    jwt.verify(token, config.server.auth.privateKey, {
+      algorithms: config.server.auth.algorithm,
+      audience: config.server.auth.audience,
+      issuer: config.server.auth.issuer
+    }, (err, decoded) => {
+      decoded ? res(decoded) : () => {
+        err.statusCode = 403
+        rej(err)
+      }
+    })
+  })
+  req.jwt = decoded
   next()
 })
 
