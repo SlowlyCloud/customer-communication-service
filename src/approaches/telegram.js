@@ -9,6 +9,7 @@
 const log = require('../logging')
 const TelegramBot = require('node-telegram-bot-api')
 const config = require('../config')
+const common = require('../common')
 
 // Config
 const tgAuth = {
@@ -20,8 +21,9 @@ const tgAuth = {
 const options = { polling: tgAuth.webhook ? false : true }
 const bot = new TelegramBot(tgAuth.token, options)
 log.trace('telegram bot created', { tgAuth, options })
-bot.setWebHook(tgAuth.webhook)
-log.trace('tg bot webhook set, webhook: %s', tgAuth.webhook)
+
+let webhookRes = common.toSyncFn(async () => await bot.setWebHook(tgAuth.webhook))
+log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, bot.getWebHookInfo())
 
 module.exports.getBotUserName = () => tgAuth.name
 
@@ -54,3 +56,8 @@ module.exports.onChatStart = (cb) => {
 }
 
 module.exports.handleReqFromWebhook = body => bot.processUpdate(body)
+
+process.on('SIGTERM', () => common(async () => {
+  const shutdown = await bot.close()
+  log.trace('tg bot disconnected %s', shutdown)
+}))
