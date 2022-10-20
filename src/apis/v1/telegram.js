@@ -1,3 +1,4 @@
+const log = require('../../logging')
 const db = require('../../db')
 const tgBot = require('../../approaches/telegram')
 const { authCode } = require('../../common')
@@ -27,6 +28,7 @@ router.get('/invitation/:code', async (req, res) => {
 router.post(`/webhook/${tgBot.getBotUserName()}`, (req, res) => {
   tgBot.handleReqFromWebhook(req.body)
   res.sendStatus(200)
+  log.info(req, 'tg webhook being called')
 })
 
 tgBot.onChatStart((msg) => {
