@@ -22,8 +22,16 @@ const options = { polling: tgAuth.webhook ? false : true }
 const bot = new TelegramBot(tgAuth.token, options)
 log.trace('telegram bot created', { tgAuth, options })
 
-let webhookRes = common.toSyncFn(async () => await bot.setWebHook(tgAuth.webhook))
-log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, bot.getWebHookInfo())
+let webhookRes = common.toSyncFn(async () => {
+  const pNum = process.env.NODE_APP_INSTANCE
+  if (pNum) {
+    const delay = pNum * 1000
+    log.trace('delay %s ms to set webhook for process %s', delay, pNum)
+    common.sleep(delay)
+  }
+  await bot.setWebHook(tgAuth.webhook)
+})
+log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, common.toSyncFn(async () => await bot.getWebHookInfo()))
 
 module.exports.getBotUserName = () => tgAuth.name
 

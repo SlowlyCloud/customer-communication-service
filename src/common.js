@@ -41,3 +41,5 @@ module.exports.toSyncFn = (asyncFn) => {
     return res
 }
 
+module.exports.sleep = (ms) => deasync.sleep(ms)
+
