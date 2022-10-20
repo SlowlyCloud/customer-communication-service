@@ -38,6 +38,7 @@ jobs:
             server_basePath=${{secrets.SERVER_BASEPATH}}
             database_mongo_name=${{secrets.MONGO_DB_NAME}}
             database_mongo_uri=${{secrets.MONGO_URI}}
+            emailServer_host=${{secrets.EMAIL_SERVER_HOST}}
             emailServer_user=${{secrets.EMAIL_SERVER_USER}}
             emailServer_pass=${{secrets.EMAIL_SERVER_PASS}}
             telegramServer_bot_username=${{secrets.TG_BOT_USERNAME}}

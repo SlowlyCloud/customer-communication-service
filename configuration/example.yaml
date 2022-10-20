@@ -1,6 +1,7 @@
 server:
   basePath: /ccs
   port: 3000
+  loggingLevel: info
 
 database:
   mongo:
@@ -8,6 +9,7 @@ database:
     uri: mongodb://root:example@localhost:27017/admin
   
 emailServer:
+  host: smtpout.secureserver.net
   user: no-reply@example.com
   pass: 12345678
   

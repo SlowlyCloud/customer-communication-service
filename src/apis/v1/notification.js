@@ -1,4 +1,4 @@
-
+const log = require('../../logging')
 const bodyParser = require('body-parser')
 const db = require('../../db')
 const emailSender = require('../../approaches/email')
@@ -14,8 +14,7 @@ router.post("/email", bodyParser.raw({ type: 'html' }), async (req, res) => {
     let info = await emailSender.send(from, to, subject, content)
     await db.notifyingLog.logEmailNotifying(null, from, to, subject, content)
 
-    console.log('Email message sent: %s', info.messageId)
-
+    log.info('Email message sent, id: %s', info.messageId)
     res.send(info)
 })
 
@@ -27,6 +26,7 @@ router.get('/email', async (req, res) => {
     let records = await db.notifyingLog.listNotifyingByEmail(userEmailAddress, timePeriod)
 
     res.send({
+        count: records ? records.length : 0,
         records: records,
         timePeriod: timePeriod
     })
@@ -39,7 +39,7 @@ router.post("/tg", bodyParser.raw({ type: 'html' }), async (req, res) => {
     let info = await tgBot.sentMsg(chatId, content, 'HTML')
     await db.notifyingLog.logTgBotNotifying(null, chatId, content)
 
-    console.log('tg message sent: %s', info)
+    log.info('tg message sent, id: %s', info.message_id)
 
     res.send(info)
 })
@@ -52,6 +52,7 @@ router.get('/tg', async (req, res) => {
     let records = await db.notifyingLog.listNotifyingByTgChatId(chatId, timePeriod)
 
     res.send({
+        count: records ? records.length : 0,
         records: records,
         timePeriod: timePeriod
     })

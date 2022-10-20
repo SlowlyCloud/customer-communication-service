@@ -1,3 +1,4 @@
+const log = require('../logging')
 const { MongoClient } = require('mongodb')
 const deasync = require('deasync')
 const config = require('../config')
@@ -13,7 +14,7 @@ const init = async () => {
         // Establish and verify connection
         await client.db("admin").command({ ping: 1 });
         db = await client.db(config.database.mongo.name)
-        console.log("Connected successfully to server");
+        log.info('mongodb connected to database: %s', config.database.mongo.name)
     } catch (e) {
         await mongodbClose()
         throw new Error('mongo starting failed: %s', e)

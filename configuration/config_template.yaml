@@ -1,6 +1,7 @@
 server:
   basePath: {{server_basePath}}
   port: 3000
+  loggingLevel: {{server_loggingLevel}}
 
 database:
   mongo:
@@ -8,6 +9,7 @@ database:
     uri: {{database_mongo_uri}}
   
 emailServer:
+  host: {{emailServer_host}}
   user: {{emailServer_user}}
   pass: {{emailServer_pass}}
 
