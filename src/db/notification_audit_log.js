@@ -1,15 +1,18 @@
+const logger = require('../logging')
 const { db } = require('./mongo')
 const { Meta } = require('../common')
 
 
 // Commons
 const log = async (userId, type, raw) => {
-    return await db.collection('notification_audit_log').insertOne({
+    let res = await db.collection('notification_audit_log').insertOne({
         userId: userId,
         type: type,
         raw: raw,
         meta: new Meta()
     })
+    logger.trace('notificaition_audit_log insert one, userId: %s type: %s raw: %s res: %s', userId, type, raw, res)
+    return res
 }
 module.exports.logNotifying = log
 
@@ -21,7 +24,9 @@ const list = async (filter, timePeriod) => {
         }
     }
 
-    return await db.collection('notification_audit_log').find(filter).toArray()
+    let res = await db.collection('notification_audit_log').find(filter).toArray()
+    logger.trace('notificaition_audit_log list, filter: %s timePeriod: %s res: %s', filter, timePeriod, res)
+    return res
 }
 module.exports.listNotifying = list
 
@@ -33,7 +38,9 @@ const count = async (filter, timePeriod) => {
         }
     }
 
-    return await db.collection('notification_audit_log').countDocuments(filter)
+    let res = await db.collection('notification_audit_log').countDocuments(filter)
+    logger.trace('notificaition_audit_log list, filter: %s timePeriod: %s res: %s', filter, timePeriod, res)
+    return res
 }
 module.exports.countNotifying = count
 
