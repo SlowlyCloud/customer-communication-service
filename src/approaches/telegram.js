@@ -9,6 +9,7 @@
 const log = require('../logging')
 const TelegramBot = require('node-telegram-bot-api')
 const config = require('../config')
+const common = require('../common')
 
 // Config
 const tgAuth = {
@@ -19,8 +20,18 @@ const tgAuth = {
 
 const options = { polling: tgAuth.webhook ? false : true }
 const bot = new TelegramBot(tgAuth.token, options)
-
 log.trace('telegram bot created', { tgAuth, options })
+
+let webhookRes = common.toSyncFn(async () => {
+  const pNum = process.env.NODE_APP_INSTANCE
+  if (pNum) {
+    const delay = pNum * 1000
+    log.trace('delay %s ms to set webhook for process %s', delay, pNum)
+    common.sleep(delay)
+  }
+  await bot.setWebHook(tgAuth.webhook)
+})
+log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, common.toSyncFn(async () => await bot.getWebHookInfo()))
 
 module.exports.getBotUserName = () => tgAuth.name
 
@@ -28,7 +39,7 @@ module.exports.getBotUserName = () => tgAuth.name
 module.exports.sentMsg = async (chatId, content, mode) => {
   mode = mode || "Markdown"
 
-  log.trace('tg sending message, chatId: %s content: %s mode: %s', chatId, content, mode)
+  log.trace('tg sending message, chatId: %s ,content: %s ,mode: %s', chatId, content, mode)
 
   let res = await bot.sendMessage(chatId, content, {
     parse_mode: mode
@@ -53,3 +64,8 @@ module.exports.onChatStart = (cb) => {
 }
 
 module.exports.handleReqFromWebhook = body => bot.processUpdate(body)
+
+process.on('SIGTERM', () => common(async () => {
+  const shutdown = await bot.close()
+  log.trace('tg bot disconnected %s', shutdown)
+}))

@@ -1,5 +1,6 @@
 const express = require('express')
 require('express-async-errors')
+const bodyParser = require('body-parser')
 const log = require('./logging')
 const config = require('./config')
 const { getFiles } = require('./common')
@@ -21,6 +22,8 @@ app.use((req, res, next) => {
   }))
   next()
 })
+
+app.use(bodyParser.json())
 
 // load & register all routers by their relative path
 var path = require('path').join(__dirname, apisFolderName)
