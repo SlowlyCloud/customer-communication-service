@@ -11,6 +11,7 @@ const app = express()
 const apisFolderName = 'apis'
 const port = config.server.port
 const basePath = config.server.basePath
+const kepPem = Buffer.from(config.server.auth.privateKey, 'base64')
 
 app.use((req, res, next) => {
   log.debug({
@@ -24,23 +25,38 @@ app.use((req, res, next) => {
   next()
 })
 
+app.get("/token", (req, res) => {
+  res.send(
+    jwt.sign(
+      { key: 'value' },
+      kepPem,
+      {
+        algorithm: config.server.auth.algorithm,
+        expiresIn: 30
+      }
+    )
+  )
+})
+
 // authorization
-app.use(async (req, res, next) => {
-  const token = req.get('Authorization')
-  if (token) return res.status(403).send("Access Denied")
+app.get('/verify', async (req, res, next) => {
+  const token = (req.get('Authorization') || '').replace('Bearer ', '')
+  if (!token) return res.status(403).send("Access Denied")
   const decoded = await new Promise((res, rej) => {
-    jwt.verify(token, config.server.auth.privateKey, {
+    jwt.verify(token, kepPem, {
       algorithms: config.server.auth.algorithm,
       audience: config.server.auth.audience,
       issuer: config.server.auth.issuer
     }, (err, decoded) => {
-      decoded ? res(decoded) : () => {
+      decoded ? res(decoded) : (() => {
         err.statusCode = 403
         rej(err)
-      }
+      })()
     })
   })
   req.jwt = decoded
+  log.trace('inbound request verified, token: %s, payload: %s', token, decoded)
+  res.send(decoded)
   next()
 })
 
