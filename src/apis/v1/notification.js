@@ -5,7 +5,7 @@ const emailSender = require('../../approaches/email')
 const tgBot = require('../../approaches/telegram')
 const router = require('express').Router()
 
-router.post("/email", bodyParser.raw({ type: 'html' }), async (req, res) => {
+router.post("/email", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
     let from = req.query.from
     let to = req.query.to
     let subject = req.query.subject
@@ -32,7 +32,7 @@ router.get('/email', async (req, res) => {
     })
 })
 
-router.post("/tg", bodyParser.raw({ type: 'html' }), async (req, res) => {
+router.post("/tg", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
     let chatId = req.query.chatId
     let content = req.body
 
