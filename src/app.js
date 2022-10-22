@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const log = require('./logging')
 const config = require('./config')
-const { getFiles } = require('./common')
+const { getDirs } = require('./common')
 const app = express()
 
 // config
@@ -38,36 +38,22 @@ app.get("/token", (req, res) => {
   )
 })
 
-// authorization
-app.get('/verify', async (req, res, next) => {
-  const token = (req.get('Authorization') || '').replace('Bearer ', '')
-  if (!token) return res.status(403).send("Access Denied")
-  const decoded = await new Promise((res, rej) => {
-    jwt.verify(token, kepPem, {
-      algorithms: config.server.auth.algorithm,
-      audience: config.server.auth.audience,
-      issuer: config.server.auth.issuer
-    }, (err, decoded) => {
-      decoded ? res(decoded) : (() => {
-        err.statusCode = 403
-        rej(err)
-      })()
-    })
-  })
-  req.jwt = decoded
-  log.trace('inbound request verified, token: %s, payload: %s', token, decoded)
-  res.send(decoded)
-  next()
-})
-
 app.use(bodyParser.json())
 
 // load & register all routers by their relative path
 var path = require('path').join(__dirname, apisFolderName)
-getFiles(path).forEach(file => {
-  let apiPath = file.replace(path, '').replace('.js', '')
-  log.info(`loading file:${file} & registering path of route ${apiPath}`)
-  app.use(basePath + apiPath, require(file))
+log.info('start loading router from path: %s ...', path)
+getDirs(path, '2', 1).filter(v => /.*\/v[0-9]{1}$/.test(v)).forEach(moduleDir => {
+  let apiPath = basePath + moduleDir.replace(path, '')
+  log.info('module: %s loading...', moduleDir)
+  app.use(apiPath, require(moduleDir))
+  log.info('registered path of router: %s', apiPath)
+})
+getDirs(path, '1', 1).forEach(file => {
+  let apiPath = basePath + file.replace(path, '').replace('.js', '')
+  log.info('file: %s loading...', file)
+  app.use(apiPath, require(file))
+  log.info('registered path of router: %s', apiPath)
 })
 
 app.use((err, req, res, next) => {
