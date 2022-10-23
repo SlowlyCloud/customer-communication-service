@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 
 const kepPem = Buffer.from(config.server.auth.privateKey, 'base64')
 
+// authorization middleware for token
 router.use(async (req, res, next) => {
   const token = (req.get('Authorization') || '').replace('Bearer ', '')
   if (!token) return res.status(403).send("Access Denied")
@@ -27,7 +28,7 @@ router.use(async (req, res, next) => {
 
 log.info('authorization middleware loaded for router module %s', __dirname)
 
-require('../../common').getDirs(__dirname, 1, -1).filter(v => v !== __filename).forEach(file => {
+require('../../common').getDirs(__dirname, '1', -1).filter(v => v !== __filename).forEach(file => {
   let apiPath = file.replace(__dirname, '').replace('.js', '')
   log.info('loading router path %s from file: %s ', apiPath, file)
   router.use(apiPath, require(file))
