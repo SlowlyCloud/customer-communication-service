@@ -1,7 +1,6 @@
 const express = require('express')
 require('express-async-errors')
 const bodyParser = require('body-parser')
-const jwt = require('jsonwebtoken')
 const log = require('./logging')
 const config = require('./config')
 const { getDirs } = require('./common')
@@ -11,7 +10,6 @@ const app = express()
 const apisFolderName = 'apis'
 const port = config.server.port
 const basePath = config.server.basePath
-const kepPem = Buffer.from(config.server.auth.privateKey, 'base64')
 
 app.use((req, res, next) => {
   log.debug({
@@ -23,19 +21,6 @@ app.use((req, res, next) => {
     res: res
   }))
   next()
-})
-
-app.get("/token", (req, res) => {
-  res.send(
-    jwt.sign(
-      { key: 'value' },
-      kepPem,
-      {
-        algorithm: config.server.auth.algorithm,
-        expiresIn: 30
-      }
-    )
-  )
 })
 
 app.use(bodyParser.json())
