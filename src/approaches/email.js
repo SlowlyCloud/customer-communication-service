@@ -6,7 +6,7 @@ class EmailProvider {
   constructor(id, transporter, isDefault) {
     this.id = id
     this.t = transporter
-    this.isDefault = isDefault
+    this.isDefault = isDefault || false
     this.errorNumPerMinute = 0
     setInterval(() => this.errorNumPerMinute = 0, 1000 * 60)
   }
@@ -45,16 +45,16 @@ class EmailProvider {
 class EmailFallbackProvider {
   /**
    * Create a EmailFallback Provider by providing a set of provider for fallback usage
-   * @param {number} unavailableThreshdhold number of error count to set a provider unavailable
+   * @param {number} unavailableThreshold number of error count to set a provider unavailable
    * @param {number} fallbackWindow number of second for a period stopping using defalut provider during the fallback
    * @param {Array<EmailProvider>} providers providers to fallback at least and only inculding one defualt provider 
    */
-  constructor(unavailableThreshdhold, fallbackWindow, providers) {
+  constructor(unavailableThreshold, fallbackWindow, providers) {
     if (providers.length < 2)
       throw new Error('you need at least two providers to create a email provider with fallback')
 
     this.isFallback = false
-    this.threshdhold = unavailableThreshdhold || 5
+    this.threshdhold = unavailableThreshold || 5
     this.fallbackWindow = (fallbackWindow || 60) * 1000
     this.providers = providers.filter(v => !v.isDefault)
     let _default = providers.filter(v => v.isDefault)
@@ -106,7 +106,7 @@ class EmailFallbackProvider {
 
 class EmailRetryingProvider {
   constructor(retryCount, provider) {
-    this.retryCount = retryCount
+    this.retryCount = retryCount || 3
     this.provider = provider
   }
 
@@ -147,26 +147,10 @@ class EmailRetryingProvider {
 
 // Config
 let _conf = {
-  providers: [
-    {
-      id: '1',
-      host: config.emailServer.host,
-      user: config.emailServer.user,
-      pass: config.emailServer.pass,
-      avaible: true,
-      isDefault: true
-    }, {
-      id: '2',
-      host: config.emailServer.host,
-      user: config.emailServer.user,
-      pass: config.emailServer.pass,
-      isDefault: false
-    }
-  ],
-  unavailableThreshdhold: 10,
-  fallbackWindow: 60000 * 1,
-  isStateFallback: false,
-  retryCount: 3,
+  providers: config.emailServers.providers,
+  unavailableThreshold: config.emailServers.unavailableThreshold || 10,
+  fallbackWindow: (config.emailServers.fallbackWindow || 60) * 1000,
+  retryCount: config.emailServers.retryCount || 3,
 }
 
 const _transporters = _conf.providers.map(v => {
@@ -188,15 +172,18 @@ const _default = _transporters.filter(v => v.isDefault)[0]
 const _triedFallbackProvder = new EmailRetryingProvider(
   _conf.retryCount,
   new EmailFallbackProvider(
-    _conf.unavailableThreshdhold,
+    _conf.unavailableThreshold,
     _conf.fallbackWindow,
     _transporters
   )
 )
 
-log.trace('email transport created', emailAuth)
+log.trace('email transport created', JSON.stringify(_conf))
 
 module.exports = {
+  EmailProvider,
+  EmailFallbackProvider,
+  EmailRetryingProvider,
   send: _default.send,
   trySendWithFallback: _triedFallbackProvder.send
 }

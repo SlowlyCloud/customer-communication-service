@@ -18,10 +18,11 @@ database:
     name: {{database_mongo_name}}
     uri: {{database_mongo_uri}}
   
-emailServer:
-  host: {{emailServer_host}}
-  user: {{emailServer_user}}
-  pass: {{emailServer_pass}}
+emailServers:
+  unavailableThreshold: {{emailServer_threshold}}
+  fallbackWindow: {{emailServer_fbWindow}}
+  retryCount: {{emailServer_retryCount}}
+  providers: {{emailServers_providers}}
 
 telegramServer:
   bot:

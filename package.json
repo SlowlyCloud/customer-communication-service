@@ -5,14 +5,15 @@
   "author": "Rick Ryan <rick.ryan2@outlook.com>",
   "main": "src/app.js",
   "scripts": {
-    "start": "node .",
-    "start-pretty": "node . | ./node_modules/.bin/bunyan",
+    "start": "node . | ./node_modules/.bin/bunyan",
+    "start-origin": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "body-parser": "^1.20.0",
     "bunyan": "^1.8.15",
     "compression": "^1.7.4",
+    "cors": "^2.8.5",
     "deasync": "^0.1.28",
     "express": "^4.18.1",
     "express-async-errors": "^3.1.1",
