@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node . | ./node_modules/.bin/bunyan",
     "start-origin": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest ."
   },
   "dependencies": {
     "body-parser": "^1.20.0",
@@ -22,5 +22,8 @@
     "mongodb": "^4.10.0",
     "node-telegram-bot-api": "^0.59.0",
     "nodemailer": "^6.7.8"
+  },
+  "devDependencies": {
+    "jest": "^29.3.1"
   }
 }

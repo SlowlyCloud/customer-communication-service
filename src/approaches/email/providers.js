@@ -1,14 +1,13 @@
-const log = require('../logging')
-const config = require('../config')
-const emailer = require('nodemailer')
+let handlers = []
 
 class EmailProvider {
-  constructor(id, transporter, isDefault) {
+  constructor(id, transporter, isDefault, log) {
     this.id = id
     this.t = transporter
     this.isDefault = isDefault || false
+    this.log = log
     this.errorNumPerMinute = 0
-    setInterval(() => this.errorNumPerMinute = 0, 1000 * 60)
+    handlers.push(setInterval(() => this.errorNumPerMinute = 0, 1000 * 60))
   }
 
   send = async (from, to, subject, content) => {
@@ -20,17 +19,17 @@ class EmailProvider {
     }
 
     let reqStr = JSON.stringify(req)
-    log.trace('email sending %s by transporter %s', reqStr, this.t.name)
+    this.log.trace('email sending %s by transporter %s', reqStr, this.id)
 
     try {
 
       let res = await this.t.sendMail(req)
-      log.trace('email sent %s by transporter %s', JSON.stringify(res), this.t.name)
+      this.log.trace('email sent %s by transporter %s', JSON.stringify(res), this.t.name)
       return res
 
     } catch (error) {
 
-      log.error('error at sending email by transporter %s, err: %s, req: %s',
+      this.log.error('error at sending email by transporter %s, err: %s, req: %s',
         this.id, JSON.stringify(error), reqStr)
 
       this.errorNumPerMinute++
@@ -105,9 +104,10 @@ class EmailFallbackProvider {
 }
 
 class EmailRetryingProvider {
-  constructor(retryCount, provider) {
+  constructor(retryCount, provider, log) {
     this.retryCount = retryCount || 3
     this.provider = provider
+    this.log = log
   }
 
   send = async (from, to, subject, content) => {
@@ -118,12 +118,12 @@ class EmailRetryingProvider {
         let res = await this.provider.send(from, to, subject, content)
 
         if (errors.length !== 0) {
-          log.debug('email sent successfully with %s retry, errors: %s',
+          this.log.debug('email sent successfully with %s retry, errors: %s',
             errors.length,
             JSON.stringify(errors)
           )
 
-          log.trace('email sent successfully with %s retry, errors: %s, content: %s',
+          this.log.trace('email sent successfully with %s retry, errors: %s, content: %s',
             errors.length,
             JSON.stringify(errors),
             JSON.stringify({
@@ -145,45 +145,13 @@ class EmailRetryingProvider {
   }
 }
 
-// Config
-let _conf = {
-  providers: config.emailServers.providers,
-  unavailableThreshold: config.emailServers.unavailableThreshold || 10,
-  fallbackWindow: (config.emailServers.fallbackWindow || 60) * 1000,
-  retryCount: config.emailServers.retryCount || 3,
-}
-
-const _transporters = _conf.providers.map(v => {
-  return new EmailProvider(
-    v.id,
-    emailer.createTransport({
-      host: v.host,
-      secure: true,
-      auth: {
-        user: v.user,
-        pass: v.pass
-      }
-    }),
-    v.isDefault
-  )
+// Graceful Shutdonw
+process.on("SIGTERM", () => {
+  handlers.forEach(v => clearInterval(v))
 })
-
-const _default = _transporters.filter(v => v.isDefault)[0]
-const _triedFallbackProvder = new EmailRetryingProvider(
-  _conf.retryCount,
-  new EmailFallbackProvider(
-    _conf.unavailableThreshold,
-    _conf.fallbackWindow,
-    _transporters
-  )
-)
-
-log.trace('email transport created', JSON.stringify(_conf))
 
 module.exports = {
   EmailProvider,
   EmailFallbackProvider,
-  EmailRetryingProvider,
-  send: _default.send,
-  trySendWithFallback: _triedFallbackProvder.send
+  EmailRetryingProvider
 }
