@@ -12,6 +12,7 @@ const app = express()
 const apisFolderName = 'apis'
 const port = config.server.port
 const basePath = config.server.basePath
+Context._defaultLogger = log
 
 
 app.use((req, res, next) => {

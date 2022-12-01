@@ -53,7 +53,7 @@ class Context {
     constructor() {
         this.log = Context._defaultLogger
     }
-    static _defaultLogger = require('./logging')
+    static _defaultLogger
     static fromRequestId = (reqId) => {
         const c = new Context()
         c.reqId = reqId
