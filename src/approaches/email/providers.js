@@ -1,3 +1,4 @@
+const { Errors } = require('../../common/errors')
 
 class EmailProvider {
   constructor(id, transporter, isDefault, log) {
@@ -110,7 +111,7 @@ class EmailRetryingProvider {
   }
 
   send = async (from, to, subject, content) => {
-    let errors = []
+    let errors = new Errors()
     for (const _ of Array(this.retryCount)) {
       try {
 
@@ -119,12 +120,12 @@ class EmailRetryingProvider {
         if (errors.length !== 0) {
           this.log.debug('email sent successfully with %s retry, errors: %s',
             errors.length,
-            JSON.stringify(errors.map(v => JSON.stringify(v, Object.getOwnPropertyNames(v))))
+            errors
           )
 
           this.log.trace('email sent successfully with %s retry, errors: %s, content: %s',
             errors.length,
-            JSON.stringify(errors.map(v => JSON.stringify(v, Object.getOwnPropertyNames(v)))),
+            errors,
             JSON.stringify({
               from: from,
               to: to,
@@ -137,7 +138,7 @@ class EmailRetryingProvider {
         return res
 
       } catch (error) {
-        errors.push(error)
+        errors.append(error)
       }
     }
     throw errors

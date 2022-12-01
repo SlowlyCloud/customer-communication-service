@@ -62,7 +62,6 @@ class Context {
     }
 }
 
-
 // deep Number: count of recursion, -1 means never end.
 // type String: "1" only file, "2" only dir, "0" both
 const getDirs = (dir, type, deep) => {

@@ -1,4 +1,5 @@
-const { EmailProvider, EmailFallbackProvider, EmailRetryingProvider } = require('./email/providers')
+const { EmailProvider, EmailFallbackProvider, EmailRetryingProvider } = require('./providers')
+const { Errors } = require('../../common/errors')
 const bunyan = require('bunyan')
 const log = bunyan.createLogger(
   {
@@ -219,7 +220,7 @@ describe('email approach', () => {
       try {
         await erp.send('', '', '', '')
       } catch (err) {
-        expect(err).toEqual([testErr, testErr, testErr])
+        expect(new Errors([testErr, testErr, testErr])).toEqual(err)
       }
     })
 
