@@ -1,4 +1,3 @@
-let handlers = []
 
 class EmailProvider {
   constructor(id, transporter, isDefault, log) {
@@ -53,11 +52,11 @@ class EmailFallbackProvider {
       throw new Error('you need at least two providers to create a email provider with fallback')
 
     this.isFallback = false
-    this.threshdhold = unavailableThreshold || 5
+    this.threshold = unavailableThreshold || 5
     this.fallbackWindow = (fallbackWindow || 60) * 1000
     this.providers = providers.filter(v => !v.isDefault)
     let _default = providers.filter(v => v.isDefault)
-    this.default = _default
+    this.default = _default[0]
 
     if (_default.length !== 1)
       throw new Error('providers should include one and only one defualt provider')
@@ -69,7 +68,7 @@ class EmailFallbackProvider {
       this.default : this.providers.find(v => this._isAvailable(v))
 
     if (!provider)
-      throw new Error('no any fallback provider of %s providers is available', this.providers.length + 1)
+      throw new Error(`no any fallback provider of ${this.providers.length + 1} providers is available`)
 
     try {
 
@@ -89,17 +88,17 @@ class EmailFallbackProvider {
   _isAvailable = (provider) => {
     if (provider.isDefault)
       return !this.isFallback
-    if (provider.errorNumPerMinute < this.threshdhold)
+    if (provider.errorNumPerMinute < this.threshold)
       return true
     else
       return false
   }
 
   tryFallback = (defaultProvider) => {
-    if (defaultProvider.errorNumPerMinute < this.threshdhold) return
+    if (defaultProvider.errorNumPerMinute < this.threshold) return
 
     this.isFallback = true
-    setInterval(() => this.isFallback = false, this.fallbackWindow)
+    setTimeout(() => this.isFallback = false, this.fallbackWindow)
   }
 }
 
@@ -112,7 +111,7 @@ class EmailRetryingProvider {
 
   send = async (from, to, subject, content) => {
     let errors = []
-    for (const _ of this.retryCount) {
+    for (const _ of Array(this.retryCount)) {
       try {
 
         let res = await this.provider.send(from, to, subject, content)
@@ -120,12 +119,12 @@ class EmailRetryingProvider {
         if (errors.length !== 0) {
           this.log.debug('email sent successfully with %s retry, errors: %s',
             errors.length,
-            JSON.stringify(errors)
+            JSON.stringify(errors.map(v => JSON.stringify(v, Object.getOwnPropertyNames(v))))
           )
 
           this.log.trace('email sent successfully with %s retry, errors: %s, content: %s',
             errors.length,
-            JSON.stringify(errors),
+            JSON.stringify(errors.map(v => JSON.stringify(v, Object.getOwnPropertyNames(v)))),
             JSON.stringify({
               from: from,
               to: to,
@@ -144,11 +143,6 @@ class EmailRetryingProvider {
     throw errors
   }
 }
-
-// Graceful Shutdonw
-process.on("SIGTERM", () => {
-  handlers.forEach(v => clearInterval(v))
-})
 
 module.exports = {
   EmailProvider,
