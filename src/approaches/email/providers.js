@@ -6,7 +6,7 @@ class EmailProvider {
     this.isDefault = isDefault || false
     this.log = log
     this.errorNumPerMinute = 0
-    handlers.push(setInterval(() => this.errorNumPerMinute = 0, 1000 * 60))
+    setInterval(() => this.errorNumPerMinute = 0, 1000 * 60)
   }
 
   send = async (from, to, subject, content) => {
