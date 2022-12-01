@@ -10,6 +10,10 @@ class Errors extends Error {
     return this.toString()
   }
 
+  get length() {
+    return this.errs.length
+  }
+
   append = (err) => {
     this.errs.push(err)
   }
