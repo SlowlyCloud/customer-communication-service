@@ -1,0 +1,117 @@
+name: Shipping to AWS ECS from Source Code
+  
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  
+
+env:
+  APP_ENV: dev
+  AWS_REGION: us-west-2
+  ECR_REPOSITORY: customer-communication-service
+  ECS_SERVICE: customer-communicaiton-service
+  ECS_CLUSTER: flipgod-dev
+  ECS_TASK_DEFINITION: customer-cummunication-service-dev/ecs/task-definition.json
+  CONTAINER_NAME: customer-communicaiton-service
+
+jobs:
+
+  build-push:
+    runs-on: ubuntu-latest
+    environment: dev
+    outputs:
+      image_tag: ${{ steps.build-image.outputs.image_tag }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Render config template
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: configuration/config_template.yaml
+          output_file: configuration/${{env.APP_ENV}}.yaml
+          strict: true
+          variables: |
+            server_basePath=${{secrets.SERVER_BASEPATH}}
+            server_loggingLevel=${{secrets.SERVER_LOGLEVEL}}
+            database_mongo_name=${{secrets.MONGO_DB_NAME}}
+            database_mongo_uri=${{secrets.MONGO_URI}}
+            emailServer_host=${{secrets.EMAIL_SERVER_HOST}}
+            emailServer_user=${{secrets.EMAIL_SERVER_USER}}
+            emailServer_pass=${{secrets.EMAIL_SERVER_PASS}}
+            telegramServer_bot_username=${{secrets.TG_BOT_USERNAME}}
+            telegramServer_bot_token=${{secrets.TG_BOT_TOKEN}}
+            telegramServer_bot_webhook=${{secrets.TG_BOT_WEBHOOK}}
+    
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG-dev .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG-dev
+          echo "::set-output name=image_tag::$IMAGE_TAG-dev"
+
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Generate token for checkout
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID_FOR_WORKFLOW }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY_FOR_WORKFLOW }}
+
+      - name: Fetch task definition 
+        uses: actions/checkout@v3
+        with:
+          repository: 'SlowlyCloud/aws-deployment'
+          ref: 'master'
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@13d241b293754004c80624b5567555c4a39ffbe3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@aaf69d68aa3fb14c1d5a6be9ac61fe15b48453a2
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1.1.1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ needs.build-push.outputs.image_tag }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1.4.10
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
