@@ -14,7 +14,7 @@ env:
   ECR_REPOSITORY: customer-communication-service
   ECS_SERVICE: customer-communicaiton-service
   ECS_CLUSTER: flipgod-dev
-  ECS_TASK_DEFINITION: customer-cummunication-service-dev/ecs/task-definition.json
+  ECS_TASK_DEFINITION: customer-cummunication-service/ecs-dev/task-definition.json
   CONTAINER_NAME: customer-communicaiton-service
 
 jobs:
