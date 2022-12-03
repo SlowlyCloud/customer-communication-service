@@ -12,7 +12,7 @@ env:
   APP_ENV: dev
   AWS_REGION: us-west-2
   ECR_REPOSITORY: customer-communication-service
-  ECS_SERVICE: customer-communicaiton-service
+  ECS_SERVICE: ccs
   ECS_CLUSTER: flipgod-dev
   ECS_TASK_DEFINITION: customer-cummunication-service/ecs/dev/task-definition.json
   CONTAINER_NAME: customer-communicaiton-service
