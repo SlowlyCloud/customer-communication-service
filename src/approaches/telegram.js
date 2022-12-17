@@ -33,6 +33,8 @@ log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook
 
 module.exports.getBotUserName = () => tgAuth.name
 
+module.exports.getBotToken = () => tgAuth.token
+
 // Mode:  'Markdown' | 'MarkdownV2' | 'HTML'
 module.exports.sentMsg = async (chatId, content, mode) => {
   mode = mode || "Markdown"

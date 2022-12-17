@@ -25,15 +25,24 @@ router.get('/invitation/:code', async (req, res) => {
   res.send(await db.tgInvitation.findOneByCode(code))
 })
 
-router.post(`/webhook/${tgBot.getBotUserName()}`, (req, res) => {
-  log.debug({
-    req: req,
-    reqBody: req.body
-  }, 'tg webhook is being called')
-  tgBot.handleReqFromWebhook(req.body)
-  res.sendStatus(200)
-  log.info({ req: req }, 'tg webhook is called')
-})
+router.post(`/webhook/${tgBot.getBotUserName()}`,
+  (req, res, next) => {
+    const tgToken = req.header('X-Telegram-Bot-Api-Secret-Token')
+    if (!tgToken || tgToken !== tgBot.getBotToken()) {
+      return res.sendStatus(401)
+    }
+    next()
+  },
+  (req, res) => {
+    log.debug({
+      req: req,
+      reqBody: req.body
+    }, 'tg webhook is being called')
+    tgBot.handleReqFromWebhook(req.body)
+    res.sendStatus(200)
+    log.info({ req: req }, 'tg webhook is called')
+  }
+)
 
 const handleSubscriptionRequest = (msg) => {
   const regex = /^\/start ([0-9a-zA-Z]{6}$)/
