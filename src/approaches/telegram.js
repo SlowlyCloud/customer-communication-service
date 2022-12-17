@@ -15,7 +15,12 @@ const common = require('../common')
 const tgAuth = {
   name: config.telegramServer.bot.username,
   token: config.telegramServer.bot.token,
-  webhook: config.telegramServer.bot.webhook
+  webhook: {
+    url: config.telegramServer.bot.webhook.url,
+    options: {
+      secret_token: config.telegramServer.bot.webhook.secretToken
+    }
+  }
 }
 
 const options = { polling: tgAuth.webhook ? false : true }
@@ -26,14 +31,16 @@ let webhookRes = common.toSyncFn(async () => {
   // TODO: [enhancement] registering webhook only once by flaging status in configuration center 
   const pNum = process.env.NODE_APP_INSTANCE
   if (!pNum || pNum === '0') {
+<<<<<<< HEAD
     return await bot.setWebHook(tgAuth.webhook.url, tgAuth.webhook.options)
+=======
+    await bot.setWebHook(tgAuth.webhook.url, tgAuth.webhook.options)
+>>>>>>> 93ff165 (fix: tg bot webhook secret token is wrong configured)
   }
 })
 log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, common.toSyncFn(async () => await bot.getWebHookInfo()))
 
 module.exports.getBotUserName = () => tgAuth.name
-
-module.exports.getBotToken = () => tgAuth.token
 
 // Mode:  'Markdown' | 'MarkdownV2' | 'HTML'
 module.exports.sentMsg = async (chatId, content, mode) => {

@@ -2,7 +2,10 @@ const log = require('../../logging')
 const db = require('../../db')
 const tgBot = require('../../approaches/telegram')
 const { authCode } = require('../../common')
+const config = require('../../config')
 const router = require('express').Router()
+
+const tgSecretToken = config.telegramServer.bot.webhook.options.secretToken
 
 router.get('/invitation-link', async (req, res) => {
   let indate = req.query.indate
@@ -28,7 +31,7 @@ router.get('/invitation/:code', async (req, res) => {
 router.post(`/webhook/${tgBot.getBotUserName()}`,
   (req, res, next) => {
     const tgToken = req.header('X-Telegram-Bot-Api-Secret-Token')
-    if (!tgToken || tgToken !== tgBot.getBotToken()) {
+    if (!tgToken || tgToken !== tgSecretToken) {
       return res.sendStatus(401)
     }
     next()

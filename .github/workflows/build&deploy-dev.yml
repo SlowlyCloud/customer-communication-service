@@ -46,7 +46,8 @@ jobs:
 
             telegramServer_bot_username=${{secrets.TG_BOT_USERNAME}}
             telegramServer_bot_token=${{secrets.TG_BOT_TOKEN}}
-            telegramServer_bot_webhook=${{secrets.TG_BOT_WEBHOOK}}
+            telegramServer_bot_wb_url=${{secrets.TG_BOT_WB_URL}}
+            telegramServer_bot_wb_token=${{secrets.TG_BOT_WB_TOKEN}}
 
             server_auth_algs=${{secrets.SERVER_AUTH_ALGS}}
             server_auth_pk=${{secrets.SERVER_AUTH_PK}}
