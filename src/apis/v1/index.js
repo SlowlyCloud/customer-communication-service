@@ -4,12 +4,20 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 
 const kepPem = Buffer.from(config.server.auth.privateKey, 'base64')
+const whiteBlackList = config.server.auth.whiteBlackList
 
 if (config.server.env === 'development' && config.server.auth.skip) {
   log.info('authorization middleware loading is skipped for router module %s', __dirname)
 } else {
 
   router.use(async (req, res, next) => {
+    if (whiteBlackList[req.originalUrl] === 1) {
+      return res.sendStatus(401)
+    }
+    if (whiteBlackList[req.originalUrl] === 0) {
+      return next()
+    }
+
     const token = (req.get('Authorization') || '').replace('Bearer ', '')
     if (!token) return res.sendStatus(401)
     const decoded = await new Promise((res, rej) => {
