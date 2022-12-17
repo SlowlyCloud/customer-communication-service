@@ -7,6 +7,7 @@ server:
     privateKey: {{server_auth_pk}}
     audience: {{server_auth_aud}}
     issuer: {{server_auth_iss}}
+    whiteBlackList: {{server_auth_wbList}}
   cors:
     origin: {{server_cors_origin}}
     credentials: {{server_cors_credentials}}

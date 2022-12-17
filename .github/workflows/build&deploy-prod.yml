@@ -51,6 +51,7 @@ jobs:
             server_auth_pk=${{secrets.SERVER_AUTH_PK}}
             server_auth_aud=${{secrets.SERVER_AUTH_AUD}}
             server_auth_iss=${{secrets.SERVER_AUTH_ISS}}
+            server_auth_wbList=${{secrets.SERVER_AUTH_WBLIST}}
 
             server_cors_origin=${{secrets.CORS_ORIGIN}}
             server_cors_credentials=${{secrets.CORS_CRED}}
