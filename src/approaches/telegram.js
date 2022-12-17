@@ -18,7 +18,7 @@ const tgAuth = {
   webhook: {
     url: config.telegramServer.bot.webhook.url,
     options: {
-      secret_token: config.telegramServer.bot.webhook.secretToken
+      secret_token: config.telegramServer.bot.webhook.options.secretToken
     }
   }
 }
