@@ -2,12 +2,63 @@ const { resolve } = require('path');
 const { readdirSync } = require('fs');
 const deasync = require('deasync')
 
-module.exports.Meta = class Meta {
+class Meta {
     constructor() {
         this.createdAt = new Date()
         this.updatedAt = null
         this.deletedAt = null
         this.version = 0
+    }
+
+    update = () => {
+        this.version = this.version++
+        this.updatedAt = new Date()
+    }
+}
+
+class Pageable {
+    constructor(pageSize, pageNum) {
+        this.size = pageSize
+        this.number = pageNum
+    }
+}
+
+class Either {
+    constructor() {
+        this.result = null
+        this.error = null
+        this._hasError = false
+    }
+
+    static fromR = (result) => {
+        let either = new Either()
+        either.result = result
+        either._hasError = false
+        return either
+    }
+
+    static fromE = (error) => {
+        let either = new Either()
+        either.error = error
+        either._hasError = true
+        return either
+    }
+
+    match = (r, e) => {
+        this._hasError ? e(this.error) : r(this.result)
+    }
+}
+
+class Context {
+    constructor() {
+        this.log = Context._defaultLogger
+    }
+    static _defaultLogger
+    static fromRequestId = (reqId) => {
+        const c = new Context()
+        c.reqId = reqId
+        c.log = Context._defaultLogger.child({ reqId })
+        return c
     }
 }
 
@@ -30,13 +81,12 @@ const getDirs = (dir, type, deep) => {
     })
     return Array.prototype.concat(...files)
 }
-module.exports.getDirs = getDirs
 
-module.exports.authCode = (length = 8) => {
+const authCode = (length = 8) => {
     return Math.random().toString(36).substring(2, length + 2);
 }
 
-module.exports.toSyncFn = (asyncFn) => {
+const toSyncFn = (asyncFn) => {
     let done = false
     let res = undefined
     asyncFn()
@@ -52,5 +102,15 @@ module.exports.toSyncFn = (asyncFn) => {
     return res
 }
 
-module.exports.sleep = (ms) => deasync.sleep(ms)
+const sleep = (ms) => deasync.sleep(ms)
 
+module.exports = {
+    Meta,
+    Pageable,
+    Either,
+    Context,
+    getDirs,
+    authCode,
+    toSyncFn,
+    sleep
+}

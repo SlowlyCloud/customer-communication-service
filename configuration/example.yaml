@@ -13,10 +13,23 @@ database:
     name: customer-communication-service
     uri: mongodb://root:example@localhost:27017/admin
   
-emailServer:
-  host: smtpout.secureserver.net
-  user: no-reply@example.com
-  pass: 12345678
+emailServers:
+  unavailableThreshold: 5
+  fallbackWindow: 60
+  retryCount: 3
+  providers: 
+    - id: 'godaddy'
+      host: smtpout.secureserver.net
+      user: no-reply@example.com
+      pass: 12345678
+    - id: 'aws-ses'
+      host: smtpout.secureserver.net
+      user: no-reply@example.com
+      pass: 12345678
+    - id: 'self-hosting'
+      host: smtpout.secureserver.net
+      user: no-reply@example.com
+      pass: 12345678
   
 telegramServer:
   bot:

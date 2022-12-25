@@ -15,7 +15,12 @@ const common = require('../common')
 const tgAuth = {
   name: config.telegramServer.bot.username,
   token: config.telegramServer.bot.token,
-  webhook: config.telegramServer.bot.webhook
+  webhook: {
+    url: config.telegramServer.bot.webhook.url,
+    options: {
+      secret_token: config.telegramServer.bot.webhook.options.secretToken
+    }
+  }
 }
 
 const options = { polling: tgAuth.webhook ? false : true }

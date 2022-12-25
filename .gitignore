@@ -2,3 +2,4 @@ node_modules
 configuration/dev.yaml
 configuration/development.yaml
 configuration/production.yaml
+log
