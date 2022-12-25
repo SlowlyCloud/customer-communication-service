@@ -35,12 +35,27 @@ router.post(`/webhook/${tgBot.getBotUserName()}`, (req, res) => {
   log.info({ req: req }, 'tg webhook is called')
 })
 
-tgBot.onChatStart((msg) => {
-  let regex = /^\/start ([0-9a-zA-Z]{6}$)/
-  let code = regex.exec(msg.text)[1]
+const handleSubscriptionRequest = (msg) => {
+  const regex = /^\/start ([0-9a-zA-Z]{6}$)/
+  const withCode = regex.exec(msg.text)
+  let code = ''
+
+  if (withCode && withCode.length > 1) {
+    code = withCode[1]
+  } else {
+    code = /([0-9a-zA-Z]{6}$)/.exec(msg.text)
+  }
+
+  if (!code) {
+    log.warn('tg: start msg is wrong to subscribe')
+    return
+  }
+
   log.info('tg new binding message, code: %s chatId: %s', code, msg.chat.id)
   db.tgInvitation.confirm(code, msg.chat.id)
-})
+}
+
+tgBot.onText(/.*/, handleSubscriptionRequest)
 
 
 module.exports = router

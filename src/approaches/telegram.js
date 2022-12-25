@@ -23,13 +23,11 @@ const bot = new TelegramBot(tgAuth.token, options)
 log.trace('telegram bot created', { tgAuth, options })
 
 let webhookRes = common.toSyncFn(async () => {
+  // TODO: [enhancement] registering webhook only once by flaging status in configuration center 
   const pNum = process.env.NODE_APP_INSTANCE
-  if (pNum) {
-    const delay = pNum * 1000
-    log.trace('delay %s ms to set webhook for process %s', delay, pNum)
-    common.sleep(delay)
+  if (!pNum || pNum === '0') {
+    return await bot.setWebHook(tgAuth.webhook.url, tgAuth.webhook.options)
   }
-  await bot.setWebHook(tgAuth.webhook)
 })
 log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, common.toSyncFn(async () => await bot.getWebHookInfo()))
 
@@ -59,9 +57,13 @@ module.exports.generateInvitingLink = (bindingId) => {
 }
 
 module.exports.onChatStart = (cb) => {
-  bot.onText(/\/start/, (msg) => cb(msg))
+  bot.onText(/\/start/, (msg) => {
+    cb(msg)
+  })
   log.trace('tg on text message callback set, regex: /start callback: %s', cb)
 }
+
+module.exports.onText = (regex, cb) => bot.onText(regex, cb)
 
 module.exports.handleReqFromWebhook = body => bot.processUpdate(body)
 
