@@ -31,11 +31,7 @@ let webhookRes = common.toSyncFn(async () => {
   // TODO: [enhancement] registering webhook only once by flaging status in configuration center 
   const pNum = process.env.NODE_APP_INSTANCE
   if (!pNum || pNum === '0') {
-<<<<<<< HEAD
     return await bot.setWebHook(tgAuth.webhook.url, tgAuth.webhook.options)
-=======
-    await bot.setWebHook(tgAuth.webhook.url, tgAuth.webhook.options)
->>>>>>> 93ff165 (fix: tg bot webhook secret token is wrong configured)
   }
 })
 log.trace('tg bot webhook set, webhook: %s, res: %s, status: %s', tgAuth.webhook, webhookRes, common.toSyncFn(async () => await bot.getWebHookInfo()))
