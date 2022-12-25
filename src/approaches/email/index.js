@@ -8,7 +8,7 @@ const { EmailProvider, EmailFallbackProvider, EmailRetryingProvider } = require(
 let _conf = {
   providers: config.emailServers.providers,
   unavailableThreshold: config.emailServers.unavailableThreshold || 10,
-  fallbackWindow: (config.emailServers.fallbackWindow || 60) * 1000,
+  fallbackWindow: (config.emailServers.fallbackWindow || 60),
   retryCount: config.emailServers.retryCount || 3,
 }
 
