@@ -1,42 +1,42 @@
 const express = require('express')
 require('express-async-errors')
 const bodyParser = require('body-parser')
-const jwt = require('jsonwebtoken')
+const cors = require('cors')
+const uuid = require('uuid')
 const log = require('./logging')
 const config = require('./config')
-const { getDirs } = require('./common')
+const { Context, getDirs, toSyncFn } = require('./common')
 const app = express()
 
 // config
 const apisFolderName = 'apis'
 const port = config.server.port
 const basePath = config.server.basePath
-const kepPem = Buffer.from(config.server.auth.privateKey, 'base64')
+Context._defaultLogger = log
+
 
 app.use((req, res, next) => {
-  log.debug({
-    direction: 'inbound',
-    req: req
-  })
-  res.on("finish", () => log.debug({
-    direction: 'outbound',
-    res: res
-  }))
+  req.ctx = Context.fromRequestId(req.get('X-Request-ID') || uuid.v4())
+  req.log = req.ctx.log
+  res.setHeader('X-Request-ID', req.ctx.reqId)
   next()
 })
 
-app.get("/token", (req, res) => {
-  res.send(
-    jwt.sign(
-      { key: 'value' },
-      kepPem,
-      {
-        algorithm: config.server.auth.algorithm,
-        expiresIn: 30
-      }
-    )
-  )
+app.use((req, res, next) => {
+  req.log.debug({
+    direction: 'inbound',
+    req: req
+  })
+  res.on("finish", () => {
+    req.log.debug({
+      direction: 'outbound',
+      res: res
+    })
+  })
+  next()
 })
+
+app.use(cors(config.server.cors))
 
 app.use(bodyParser.json())
 
@@ -58,7 +58,7 @@ getDirs(path, '1', 1).forEach(file => {
 
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).send(err.message)
-  log.error({
+  req.log.error({
     err: err,
     req: req,
     res, res
@@ -69,3 +69,13 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   log.info(`Customer Communication Service Started on Port ${port} with Base Path ${basePath}`)
 })
+
+// graceful shutdown
+process.on('SIGTERM', () => toSyncFn(async () => {
+  const info = await new Promise((res, rej) => {
+    server.close((e) => {
+      e ? rej(e) : res(true)
+    })
+  })
+  log.trace('Customer Communication Service Shutting down %s', info)
+}))

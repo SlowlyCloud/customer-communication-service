@@ -3,59 +3,57 @@ const bodyParser = require('body-parser')
 const db = require('../../db')
 const emailSender = require('../../approaches/email')
 const tgBot = require('../../approaches/telegram')
-const router = require('express').Router()
+module.exports = require('express').Router()
 
-router.post("/email", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
-    let from = req.query.from
-    let to = req.query.to
-    let subject = req.query.subject
-    let content = req.body
+    .post("/email", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
+        let from = req.query.from
+        let to = req.query.to
+        let subject = req.query.subject
+        let content = req.body
 
-    let info = await emailSender.send(from, to, subject, content)
-    await db.notifyingLog.logEmailNotifying(null, from, to, subject, content)
+        let info = await emailSender.trySendWithFallback(from, to, subject, content)
+        await db.notifyingLog.logEmailNotifying(null, from, to, subject, content)
 
-    log.info('Email message sent, id: %s', info.messageId)
-    res.send(info)
-})
-
-router.get('/email', async (req, res) => {
-    let userEmailAddress = req.query.email
-    let timePeriod = req.query.start && req.query.end ?
-        { start: new Date(req.query.start), end: new Date(req.query.end) } : null
-
-    let records = await db.notifyingLog.listNotifyingByEmail(userEmailAddress, timePeriod)
-
-    res.send({
-        count: records ? records.length : 0,
-        records: records,
-        timePeriod: timePeriod
+        log.info('Email message sent, id: %s', info.messageId)
+        res.send(info)
     })
-})
 
-router.post("/tg", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
-    let chatId = req.query.chatId
-    let content = req.body
+    .get('/email', async (req, res) => {
+        let userEmailAddress = req.query.email
+        let timePeriod = req.query.start && req.query.end ?
+            { start: new Date(req.query.start), end: new Date(req.query.end) } : null
 
-    let info = await tgBot.sentMsg(chatId, content, 'HTML')
-    await db.notifyingLog.logTgBotNotifying(null, chatId, content)
+        let records = await db.notifyingLog.listNotifyingByEmail(userEmailAddress, timePeriod)
 
-    log.info('tg message sent, id: %s', info.message_id)
-
-    res.send(info)
-})
-
-router.get('/tg', async (req, res) => {
-    let chatId = req.query.chatId
-    let timePeriod = req.query.start && req.query.end ?
-        { start: new Date(req.query.start), end: new Date(req.query.end) } : null
-
-    let records = await db.notifyingLog.listNotifyingByTgChatId(chatId, timePeriod)
-
-    res.send({
-        count: records ? records.length : 0,
-        records: records,
-        timePeriod: timePeriod
+        res.send({
+            count: records ? records.length : 0,
+            records: records,
+            timePeriod: timePeriod
+        })
     })
-})
 
-module.exports = router
+    .post("/tg", bodyParser.raw({ type: 'HTML' }), async (req, res) => {
+        let chatId = req.query.chatId
+        let content = req.body
+
+        let info = await tgBot.sentMsg(chatId, content, 'HTML')
+        await db.notifyingLog.logTgBotNotifying(null, chatId, content)
+
+        log.info('tg message sent, id: %s', info.message_id)
+
+        res.send(info)
+    })
+
+    .get('/tg', async (req, res) => {
+        let chatId = req.query.chatId
+        let timePeriod = req.query.start && req.query.end ?
+            { start: new Date(req.query.start), end: new Date(req.query.end) } : null
+
+        let records = await db.notifyingLog.listNotifyingByTgChatId(chatId, timePeriod)
+
+        res.send({
+            count: records ? records.length : 0,
+            records: records,
+            timePeriod: timePeriod
+        })
+    })
