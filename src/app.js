@@ -6,6 +6,8 @@ const uuid = require('uuid')
 const log = require('./logging')
 const config = require('./config')
 const { Context, getDirs, toSyncFn } = require('./common')
+const otel = require('./tracing')
+otel.start()
 const app = express()
 
 // config

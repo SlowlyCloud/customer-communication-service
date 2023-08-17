@@ -10,6 +10,13 @@
     "test": "jest ."
   },
   "dependencies": {
+    "@opentelemetry/context-async-hooks": "^1.15.2",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.41.2",
+    "@opentelemetry/instrumentation-express": "^0.33.1",
+    "@opentelemetry/instrumentation-http": "^0.41.2",
+    "@opentelemetry/sdk-node": "^0.41.2",
+    "@opentelemetry/sdk-trace-base": "^1.15.2",
+    "@opentelemetry/semantic-conventions": "^1.15.2",
     "body-parser": "^1.20.0",
     "bunyan": "^1.8.15",
     "compression": "^1.7.4",

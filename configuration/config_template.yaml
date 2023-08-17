@@ -1,4 +1,6 @@
 server:
+  id: ccs
+  localDebug: false
   basePath: {{server_basePath}}
   port: 3000
   loggingLevel: {{server_loggingLevel}}
@@ -33,3 +35,7 @@ telegramServer:
       url: {{telegramServer_bot_wb_url}}
       options:
         secretToken: {{telegramServer_bot_wb_token}}
+
+otel:
+  honeycomb:
+    apiKey: {{otel_honeycomb_apiKey}}

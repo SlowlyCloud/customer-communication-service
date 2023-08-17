@@ -1,4 +1,6 @@
 server:
+  id: ccs
+  localDebug: true
   basePath: /ccs
   port: 3000
   loggingLevel: info
@@ -36,3 +38,7 @@ telegramServer:
     username: 123
     token: dsfsafsf
     webhook: example.com/tg/123/webhook
+
+otel:
+  honeycomb:
+    apiKey: 13123123
