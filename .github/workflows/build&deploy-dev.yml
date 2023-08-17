@@ -60,6 +60,8 @@ jobs:
             server_cors_methods=${{secrets.CORS_METHODS}}
             server_cors_headers=${{secrets.CORS_HEADERS}}
 
+            otel_honeycomb_apiKey=${{secrets.DEV_OTEL_HONEYCOMB_API_KEY}}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         with:
