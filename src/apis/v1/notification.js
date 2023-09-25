@@ -10,10 +10,12 @@ module.exports = require('express').Router()
         let to = req.query.to
         let subject = req.query.subject
         let content = req.body
-
+        // Extract tags from request url params
+        let tags = req.query.tags
+        
         let info = await emailSender.trySendWithFallback(from, to, subject, content)
-        await db.notifyingLog.logEmailNotifying(null, from, to, subject, content)
-
+        // Load event to audit DB
+        await db.notifyingLog.logEmailNotifying(null, from, to, subject, content, tags)
         log.info('Email message sent, id: %s', info.messageId)
         res.send(info)
     })
