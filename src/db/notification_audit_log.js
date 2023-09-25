@@ -46,12 +46,13 @@ module.exports.countNotifying = count
 
 
 // For Email
-module.exports.logEmailNotifying = async (userId, from, to, subject, content) => {
+module.exports.logEmailNotifying = async (userId, from, to, subject, content, tags) => {
     return await log(userId, 'email', {
         from: from,
         to: to,
         subject: subject,
-        content: content
+        content: content,
+        tags: tags
     })
 }
 
